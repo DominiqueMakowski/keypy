@@ -80,7 +80,7 @@ def hdf5_to_besa(inputhdf5, outputfolder, database, eeg_info_study_obj, TSB=0.00
                         timeframe_channel=timeframe_channel_dset.value
                         dset = timeframe_channel
 
-                        print 'writing to besa', '{0} {1} {2} {3}' .format(groupi, pti, cond, run), 'shape', dset.shape
+                        print('writing to besa', '{0} {1} {2} {3}' .format(groupi, pti, cond, run), 'shape', dset.shape)
 
                         #test if nch user matches nch file
                         if nch != len(dset[0]):
@@ -143,7 +143,7 @@ def hdf5_to_ascii(inputhdf5, database, eeg_info_study_obj, outputfolder, numbero
                             if len(dset)>TF*numberofepochs:
                                 dset = dset[0:TF*numberofepochs,:]
                             else:
-                                print 'inputhdf: ', inputhdf, 'processing stage: ', database, 'did only contain: ', len(dset), 'timeframes. ', 'when a minimum of number of time frames per epoch times epoch length was expected: ', TF*numberofepochs 
+                                print('inputhdf: ', inputhdf, 'processing stage: ', database, 'did only contain: ', len(dset), 'timeframes. ', 'when a minimum of number of time frames per epoch times epoch length was expected: ', TF*numberofepochs) 
                                     
                         if shortname:
                             filename = '%s' % (pti)
