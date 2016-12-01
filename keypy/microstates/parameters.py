@@ -4,7 +4,7 @@
 
 from __future__ import print_function
 
-from scipy.stats import nanmean, pearsonr
+from scipy.stats import pearsonr
 from keypy.microstates.microstates_helper import *
 from numpy import sqrt
 import os.path as op
@@ -38,7 +38,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
     state_match_percentage_std_all_epochs= dict.fromkeys(list(range(len(eeg)/TF)))
     gfp_curves_all_epochs= dict.fromkeys(list(range(len(eeg)/TF)))
 
-    #################  
+    #################
     # 3.) LOOP ACROSS 2 Sec Segments
     #################
 
@@ -50,48 +50,48 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
 
     for epochnr in range(len(eeg)/TF):
         epoch = eeg[epochnr*TF:(epochnr+1)*TF]
-  
-        #################   
+
+        #################
         # 3.) COMPUTE GFP (ln1 or ln2)
         #################
-        
+
         gfp_curve = compute_gfp(epoch, confobj.method_GFPpeak)
         if confobj.debug:
             print('GFP Curve computed')
 
-        #################   
+        #################
         # 3.) Average ref prior to gfp_1
-        #################         
-        
+        #################
+
         #average ref epoch
         epoch_mean = epoch.mean(axis=1)
-        epoch = epoch - epoch_mean[:, np.newaxis] 
+        epoch = epoch - epoch_mean[:, np.newaxis]
 
         #average ref maps
         maps_mean = maps.mean(axis=1)
-        maps = maps-maps_mean[:, np.newaxis] 
-        
-        #################   
+        maps = maps-maps_mean[:, np.newaxis]
+
+        #################
         # 3.) Set to gfp_1 prior to correlation computation
-        #################         
-        
+        #################
+
         ##set to gfp_1 prior to correlation computation
         #set to gfp_1 of all tfs
-        ###############            
+        ###############
         epoch = set_gfp_all_1(epoch, gfp_curve)
 
         #set to gfp_1 of all external maps
-        ###############            
+        ###############
         gfp_curve_maps = compute_gfp(maps, confobj.method_GFPpeak)
         maps = set_gfp_all_1(maps, gfp_curve_maps)
 
-        #################   
+        #################
         #4.) Compute GFP Peaks (identical to modelmaps.py)
         #################
-        
+
         gfp_peak_indices, gfp_curve = compute_gfp_peaks(gfp_curve, confobj.use_gfp_peaks, confobj.use_smoothing, confobj.gfp_type_smoothing, confobj.smoothing_window, confobj.use_fancy_peaks)
-       
-        ################# 
+
+        #################
         #5.) Determine Mstate class for each peak
         #################
 
@@ -127,13 +127,13 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
                 if confobj.correspondance_cutoff == 0 or max(corr_list) > confobj.correspondance_cutoff:
                     attribution_matrix_indices[key]=[corr_list.index(max(corr_list)), max(corr_list)]
                 else:
-                    attribution_matrix_indices[key]=[999, max(corr_list)]   
+                    attribution_matrix_indices[key]=[999, max(corr_list)]
 
             elif confobj.similarity_measure == 'dissimilarity':
                 if confobj.correspondance_cutoff == 0 or min(corr_list) < confobj.correspondance_cutoff:
                     attribution_matrix_indices[key]=[corr_list.index(min(corr_list)), min(corr_list)]
                 else:
-                    attribution_matrix_indices[key]=[999, min(corr_list)] 
+                    attribution_matrix_indices[key]=[999, min(corr_list)]
             else:
                 print('Error confobj.similarity_measure must be correlation or dissimilarity but it is {0}'.format(confobj.similarity_measure))
 
@@ -153,18 +153,18 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
                 start = previous+((ele-previous)/2.)
                 start_state = start, attribution_matrix_indices[ele]
                 start_state_list.append(start_state)
-                previous = ele   
+                previous = ele
 
-      
+
 
         #Compute mstate duration (in tfs & converted into ms) for each class
 
         #dictionary of the 4 states
         dur_state=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
         gfp_state=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
-                  
+
         i = 0
-        while (i < len(start_state_list)-1):            
+        while (i < len(start_state_list)-1):
             beg=start_state_list[i][0]
             end=start_state_list[i+1][0]
             dur=end-beg
@@ -177,7 +177,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
                 gfp_state[state] = []
             gfp_state[state].append(np.mean(gfp_curve[int(beg+1):(int(end)+1)]))
 
-            
+
             i=i+1
 
             if (dur_state is None):
@@ -194,7 +194,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
             if dur_state[i] == None:
                 pass
             else:
-                dur_sum=dur_sum+np.sum(dur_state[i]) 
+                dur_sum=dur_sum+np.sum(dur_state[i])
 
         ####
         #Frequency
@@ -210,20 +210,20 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
                 freq_dict[mapnr] = (len(dur_state[mapnr])*(TF*(1000/float(Fs)/dur_sum)/float(TF/float(Fs))))
 
 
-       
+
         ####
         #Mean Duration & Std from tf to secs
         ####
 
         dur_dict=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
         durstd_dict=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
-        for mapnr in range(confobj.original_nr_of_maps): 
+        for mapnr in range(confobj.original_nr_of_maps):
             if dur_state[mapnr] == None:
                 dur_dict[mapnr] = 0
                 durstd_dict[mapnr] = 0
             else:
                 dur_dict[mapnr] = np.mean(dur_state[mapnr])
-                durstd_dict[mapnr] = np.std(dur_state[mapnr]) 
+                durstd_dict[mapnr] = np.std(dur_state[mapnr])
 
         ####
         #Coverage (in % of 2 s epoch)
@@ -232,12 +232,12 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
 
         #Compute relative coverage for each state
         cov_dict=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
-        for mapnr in range(confobj.original_nr_of_maps): 
+        for mapnr in range(confobj.original_nr_of_maps):
             if dur_state[mapnr] == None:
                 cov_dict[mapnr] = 0
             else:
                 cov_dict[mapnr] = np.sum(dur_state[mapnr]) /float(dur_sum)
-            
+
 
         ####
         #Number of GFP Peaks in Epoch
@@ -254,7 +254,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
         ####
         gfp_mean=dict.fromkeys(list(range(confobj.original_nr_of_maps)))
 
-        for mapnr in range(confobj.original_nr_of_maps):  
+        for mapnr in range(confobj.original_nr_of_maps):
             if  gfp_state[mapnr] == None:
                 gfp_mean[mapnr]="-"
             else:
@@ -275,19 +275,19 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
             start_state_list_array[ele1][2]=ele2[1][1]
 
         start_state_list = start_state_list_array
- 
+
         ####
         #Explained variance (of channels that were shared between EEG and models)
-        ####     
-        
+        ####
+
         model = maps
 
         #Norm computation
         #set to vector length 1
-        b=np.sum(np.abs(model)**2,axis=-1)**(1./2)    
+        b=np.sum(np.abs(model)**2,axis=-1)**(1./2)
         #divide all elements by norm vector
         for col in range(model.shape[1]):
-            model[:,col]=model[:,col]/b       
+            model[:,col]=model[:,col]/b
 
         #Covariance Matrix computation
         covm=np.dot(epoch[gfp_peak_indices],model.T)
@@ -298,7 +298,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
 
         b_loading=loading/sqrt(model.shape[1])
         b_loading_all=loading_all/sqrt(model.shape[1])
-        		
+
         exp_var=sum(b_loading)/sum(epoch[gfp_peak_indices].std(axis=1))
         exp_var_tot=sum(b_loading_all)/sum(epoch.std(axis=1))
 
@@ -318,7 +318,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
             else:
                 state_match_percentage_std[keyli]=np.std(state_match_percentage[keyli])
                 state_match_percentage[keyli]=np.mean(state_match_percentage[keyli])
-            
+
             ##Coversion dict to array
             s_m_p=np.zeros((len(state_match_percentage),2))
 
@@ -344,7 +344,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
         for mstate in range(confobj.original_nr_of_maps):
             for ele in attribution_matrix_indices:
                 #print 'mstate', mstate
-                if attribution_matrix_indices[ele][0] == mstate:                  
+                if attribution_matrix_indices[ele][0] == mstate:
                     individu_dict[mstate]=np.vstack((individu_dict[mstate], epoch[ele]))
 
 
@@ -358,7 +358,7 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
         ###########
         #Compute mstate duration (in tfs) for each class for each time the class occurs
         #dur_state
-        #print dur_state_all_epochs 
+        #print dur_state_all_epochs
         dur_state_all_epochs[epochnr] = dur_state
         #Frequency
         #freq_dict
@@ -416,12 +416,12 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
 
 
     ###Convert all measures into two dictionaries depending on whether they represent a dataset or attribute
- 
-    #create dictionary for runwise datasets (keys are the descriptions that will be in the hdf5 outputfile) 
+
+    #create dictionary for runwise datasets (keys are the descriptions that will be in the hdf5 outputfile)
     runwise_data = {}
     runwise_data['Individual_States']=individu_mstate
-       
-    #create dictionary for epochwise datasets (keys are the descriptions that will be in the hdf5 outputfile) 
+
+    #create dictionary for epochwise datasets (keys are the descriptions that will be in the hdf5 outputfile)
     epochwise_datasets = [start_state_list_all_epochs, state_match_percentage_all_epochs, state_match_percentage_std_all_epochs, gfp_curves_all_epochs]
     epochwise_datasets_string = ['Start state array', 'State Match Mean percentage', 'State Match Std percentage', 'GFP Curve']
 
@@ -429,8 +429,8 @@ def compute_mstate_parameters(confobj, eeg, maps, eeg_info_study_obj):
     for elenr, ele in enumerate(epochwise_datasets):
         ele_string = epochwise_datasets_string[elenr]
         epochwise_data[ele_string]=ele
-        
-    #create dictionary for mapwise datasets (keys are the descriptions that will be in the hdf5 outputfile)            
+
+    #create dictionary for mapwise datasets (keys are the descriptions that will be in the hdf5 outputfile)
     mapwise_datasets = [occ, dur, durstd_dict_all_epochs, cov, gfp_mean_all_epochs, dur_state_all_epochs]
     mapwise_datasets_string = ['Occurrance per s', 'Mean duration in ms', 'SD duration in ms', 'Coverage in percent', 'GFP Mean across all tfs', 'number of ms for each state']
 
@@ -480,7 +480,7 @@ def get_data_provider_for_parameter_by(parameter_by, inputfolder, hdf5_filename,
         # the folder path to the modelmaps to sortby (for parameter computation) file
         sortbyfolder = sortbyfolder
         sortbyhdf5 = os.path.join(sortbyfolder, sortbyfile)
-        sortbydataset = sortbydataset 
+        sortbydataset = sortbydataset
 
         sortbychlist = os.path.join(sortbyfolder,external_chlist)
 
@@ -513,8 +513,8 @@ def get_data_provider_for_parameter_by(parameter_by, inputfolder, hdf5_filename,
     else:
         ######################
         ###  sort by hdf5  ###
-        ######################       
-            
+        ######################
+
         # the folder path to the all_recoredings.hdf file
         library_path = os.path.dirname(os.path.abspath(__file__))
         inputhdf5 = os.path.join( inputfolder, hdf5_filename)
@@ -532,7 +532,7 @@ def get_data_provider_for_parameter_by(parameter_by, inputfolder, hdf5_filename,
         # the folder path to the output hdf5 file
         outputhdf5 = os.path.join(sortbyfolder, basename(sortbyhdf5).split('.')[0] ,'mstate_parameters.hdf5')
 
-        
+
         if parameter_by == '1Level':
             data_provider=ParametersBy1LevelDataProvider1(inputhdf5, sortbyhdf5, outputhdf5, inputdataset, sortbydataset, sortbychlist)
         elif parameter_by == '2Levels':
@@ -572,7 +572,7 @@ def run_parameters(data_provider, confobj, eeg_info_study_obj):
         output_data_all[output_path]=output_data
 
     #create csv sheets for all group cond pt run based on dictionary: output_data_all
-    #get location for outputhdf5 for folder 
+    #get location for outputhdf5 for folder
 
     data_provider.write_output_totext(confobj, eeg_info_study_obj, output_data_all)
 
