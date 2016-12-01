@@ -84,7 +84,7 @@ def hdf5_to_besa(inputhdf5, outputfolder, database, eeg_info_study_obj, TSB=0.00
 
                         #test if nch user matches nch file
                         if nch != len(dset[0]):
-                            print 'Channel number mismatch between inputhdf and manually specified number of channels'
+                            print('Channel number mismatch between inputhdf and manually specified number of channels')
                         #number of timeframes in the whole file
                         nodp=len(dset)
                         #Line 1
