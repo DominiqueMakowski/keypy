@@ -10,7 +10,6 @@ from numpy import sqrt
 from numpy import nanmean
 import os.path as op
 import os
-from sets import Set
 import numpy as np
 from keypy.microstates.parameters import *
 from keypy.microstates.sortmaps_provider import *
@@ -611,9 +610,9 @@ def output_mstate_label_list(confobj, eeg_info_study_obj, outputfolder, output_d
 
 
     #get list of all Pts
-    pt_set = Set()
-    cond_set = Set()
-    run_set = Set()
+    pt_set = set()
+    cond_set = set()
+    run_set = set()
 
     for output_data_path in output_data_all.keys():
         #in order to ensure that all participants are included, the participant is characterized by its name and its group
