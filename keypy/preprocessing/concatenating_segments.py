@@ -120,10 +120,10 @@ def concatenate_various(mydir, ntf, nch, id_start, id_end, ending_in, ending_out
                 conc_file = file_content
 
         assert(np.sum(file_len)==conc_file.shape[0])
-        print 'Concatenating', idi, ' File length: ', np.sum(file_len)
+        print('Concatenating', idi, ' File length: ', np.sum(file_len))
 
         np.savetxt('{0}.{1}' .format(idi, ending_out), conc_file)
 
-    print 'Concatenating succesfully completed.'
+    print('Concatenating succesfully completed.')
 
 
