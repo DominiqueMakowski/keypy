@@ -4,9 +4,10 @@
 
 from __future__ import print_function
 
-from scipy.stats import nanmean, pearsonr
+from scipy.stats import pearsonr
 from keypy.microstates.microstates_helper import *
 from numpy import sqrt
+from numpy import nanmean
 import os.path as op
 import os
 from sets import Set
