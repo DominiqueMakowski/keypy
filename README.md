@@ -11,6 +11,11 @@ Install the package from the command line with:
 
 	pip install keypy
 
+The development version is available with:
+
+	pip install https://github.com/DominiqueMakowski/keypy/zipball/master
+
+
 
 Citation
 --------
