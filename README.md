@@ -9,11 +9,7 @@ Installation
 
 Install the package from the command line with:
 
-	sudo pip install keypy
-
-On Windows, install the executable file from PyPi:
-
-	https://pypi.python.org/pypi/keypy
+	pip install keypy
 
 
 Citation
